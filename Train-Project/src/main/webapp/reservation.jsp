@@ -1,0 +1,73 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page session="true" %>
+<%@ page import="java.util.List, java.util.Map" %>
+<%@ page import="java.text.NumberFormat" %>
+<%@ page import="java.util.Locale" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reservation</title>
+    <style>
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .top-right {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .logo img {
+            height: 110px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <a href="TrainScheduleServlet">
+                <img src="group17-logo.png" alt="Group 17 Transit Logo">
+            </a>
+        </div>
+        <div class="top-right">
+            <form method="post" action="LogoutServlet">
+                <input type="submit" value="Logout">
+            </form>
+        </div>
+    </div>
+
+    <h2>Your Reservation</h2>
+    <%
+        List<Map<String, String>> cart = (List<Map<String, String>>) session.getAttribute("cart");
+        if (cart != null && !cart.isEmpty()) {
+    %>
+        <table border="1">
+            <tr>
+                <th>Departure Date and Time</th>
+                <th>Origin Station Name</th>
+                <th>Destination Station Name</th>
+                <th>Line Name</th>
+                <th>Train ID</th>
+                <th>Cost</th>
+                <th>Actions</th>
+            </tr>
+            <% for (int i = 0; i < cart.size(); i++) { 
+                Map<String, String> reservation = cart.get(i);
+            %>
+                <tr>
+                    <td><%= reservation.get("DepartureDateTime") %></td>
+                    <td><%= reservation.get("OriginStationName") %></td>
+                    <td><%= reservation.get("DestinationStationName") %></td>
+                    <td>Northeast Corridor</td>
+                    <td><%= reservation.get("TrainId") %></td>
+                    <td><%= reservation.get("CalculatedFare") %></td>
+                </tr>
+            <% } %>
+        <% } %>
+        </table>
+</body>
+</html>
