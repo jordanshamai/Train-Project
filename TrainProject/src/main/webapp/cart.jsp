@@ -56,7 +56,7 @@
                 <th>Origin Station Name</th>
                 <th>Destination Station Name</th>
                 <th>Line Name</th>
-                <th>Train ID</th>
+                <th>Train Number</th>
                 <th>Cost</th>
                 <th>Actions</th>
             </tr>
@@ -68,7 +68,7 @@
                     <td><%= reservation.get("OriginStationName") %></td>
                     <td><%= reservation.get("DestinationStationName") %></td>
                     <td>Northeast Corridor</td>
-                    <td><%= reservation.get("TrainId") %></td>
+                    <td><%= reservation.get("TrainNumber") %></td>
                     <td><%= reservation.get("CalculatedFare") %></td>
                     <td>
                         <form method="post" action="CartServlet">
