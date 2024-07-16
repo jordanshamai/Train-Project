@@ -44,6 +44,7 @@ public class CartServlet extends HttpServlet {
         String fareTypeId = request.getParameter("FareTypeId");
         String roundTrip = request.getParameter("RoundTrip");
         String calculatedFare = request.getParameter("CalculatedFare");
+        String trainNumber = request.getParameter("TrainNumber");
 
         Map<String, String> reservation = new HashMap<>();
         reservation.put("DepartureDateTime", departureDateTime);
@@ -57,6 +58,7 @@ public class CartServlet extends HttpServlet {
         reservation.put("FareTypeId", fareTypeId);
         reservation.put("RoundTrip", roundTrip);
         reservation.put("CalculatedFare", calculatedFare);
+        reservation.put("TrainNumber", trainNumber);
 
         List<Map<String, String>> cart = (List<Map<String, String>>) session.getAttribute("cart");
         if (cart == null) {

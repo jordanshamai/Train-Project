@@ -170,7 +170,8 @@
                     <input type="hidden" name="OriginStationName" value="<%= schedule.get("OriginStationName") %>">
                     <input type="hidden" name="DestinationStationName" value="<%= schedule.get("DestinationStationName") %>">
                     <input type="hidden" name="LineId" value="<%= schedule.get("LineId") %>">
-                    <input type="hidden" name="TrainId" value="<%= schedule.get("TrainNumber") %>">
+                    <input type="hidden" name="TrainId" value="<%= schedule.get("TrainId") %>">
+                    <input type="hidden" name="TrainNumber" value="<%= schedule.get("TrainNumber") %>">
                     <input type="hidden" name="CustomerId" value="<%= session.getAttribute("CustomerId") %>">
                     <input type="hidden" name="FareTypeId" value="1">
                     <input type="hidden" name="RoundTrip" value="0">

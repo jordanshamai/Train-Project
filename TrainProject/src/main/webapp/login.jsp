@@ -22,9 +22,7 @@
 <body>
     <div class="header">
         <div class="logo">
-            
                 <img src="group17-logo.png" alt="Group 17 Transit Logo">
-            
         </div>
 
     </div>
