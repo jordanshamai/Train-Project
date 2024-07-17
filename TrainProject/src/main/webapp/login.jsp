@@ -14,7 +14,7 @@
         }
       
         .logo img {
-            height: 110px;
+            height: 110px;\
             cursor: pointer;
         }
     </style>
@@ -24,7 +24,6 @@
         <div class="logo">
                 <img src="group17-logo.png" alt="Group 17 Transit Logo">
         </div>
-
     </div>
 </head>
 <body>

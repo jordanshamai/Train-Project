@@ -3,6 +3,10 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
+         <welcome-file-list>
+        <welcome-file>login.jsp</welcome-file>
+        <welcome-file>AddCustomerRepServlet</welcome-file>
+    </welcome-file-list>
          <servlet>
     <servlet-name>CartServlet</servlet-name>
     <servlet-class>CartServlet</servlet-class>
@@ -66,7 +70,13 @@
         <url-pattern>/ReservationServlet</url-pattern>
     </servlet-mapping>
 
-    <welcome-file-list>
-        <welcome-file>login.jsp</welcome-file>
-    </welcome-file-list>
+    
+     <servlet>
+        <servlet-name>AddCustomerRepServlet</servlet-name>
+        <servlet-class>AddCustomerRepServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddCustomerRepServlet</servlet-name>
+        <url-pattern>/AddCustomerRepServlet</url-pattern>
+    </servlet-mapping>
 </web-app>

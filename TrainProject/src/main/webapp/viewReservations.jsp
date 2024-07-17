@@ -5,6 +5,7 @@
 <html>
 <head>
     <title>View Reservations</title>
+    
     <style>
         table {
             width: 70%;
@@ -17,9 +18,38 @@
             padding: 10px;
             text-align: left;
         }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .top-right {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .logo img {
+            height: 110px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div class="header">
+        <div class="logo">
+            <a href="SearchServlet">
+                <img src="group17-logo.png" alt="Group 17 Transit Logo">
+            </a>
+        </div>
+        <div class="top-right">
+            <form method="post" action="logout">
+                <input type="submit" value="Logout">
+            </form>
+        </div>
+    </div>
+
     <h2>Your Reservations</h2>
     <%
         List<Map<String, String>> reservations = (List<Map<String, String>>) session.getAttribute("reservations");

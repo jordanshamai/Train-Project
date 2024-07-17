@@ -20,7 +20,9 @@ public class SearchServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Fetching stations for dropdowns
+    	List<Map<String,Object>> lines = fetchLines();
         List<Map<String, Object>> stations = fetchStations();
+        
         // Debug: Print the stations list to verify it is not null
         System.out.println("Stations in doGet: " + stations);
         // Setting stations attribute for the JSP
@@ -93,7 +95,54 @@ public class SearchServlet extends HttpServlet {
         request.setAttribute("departureAfterTime", departureAfterTime);
         request.getRequestDispatcher("search.jsp").forward(request, response);
     }
+    private List<Map<String, Object>> fetchLines() {
+        List<Map<String, Object>> lines = new ArrayList<>();
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cs336project", "root", "Secret Password");
 
+            String query = "SELECT LineId, LineName FROM line order by LineName";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> line = new HashMap<>();
+                line.put("LineId", rs.getInt("LineId"));
+                line.put("LineName", rs.getString("LineName"));
+                lines.add(line);
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lines;
+    }
+    
+    private List<Map<String, Object>> fetchDirections(int lineId) {
+        List<Map<String, Object>> directions = new ArrayList<>();
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cs336project", "root", "Secret Password");
+
+            String query = "SELECT DirectionId, DirectionName FROM line_direction where LineId = ? order by DirectionId";
+            PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, lineId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> direction = new HashMap<>();
+                direction.put("DirectionId", rs.getInt("DirectionId"));
+                direction.put("DirectionName", rs.getString("DirectionName"));
+                directions.add(direction);
+            }
+            rs.close();
+            ps.close();
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return directions;
+    }
     private List<Map<String, Object>> fetchStations() {
         List<Map<String, Object>> stations = new ArrayList<>();
         try {
