@@ -30,9 +30,9 @@
     <h2>Login</h2>
     <form action="LoginServlet" method="post">
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" value="jordan" required><br><br>
+        <input type="text" id="username" name="username" value="employee" required><br><br>
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" value="jordan" required><br><br>
+        <input type="password" id="password" name="password" value="employee" required><br><br>
         <input type="submit" value="Login">
     </form>
     <br><br>

@@ -49,7 +49,7 @@ public class LoginServlet extends HttpServlet {
                 if(employeeType.equals("Admin")) {
                 response.sendRedirect("adminDashboard.jsp");
             } else {
-            	response.sendRedirect("repDashboard.jsp");
+            	response.sendRedirect("customerRepDashboard.jsp");
             }
                 return;
             }

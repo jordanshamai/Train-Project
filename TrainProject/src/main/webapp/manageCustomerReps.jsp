@@ -71,7 +71,7 @@
 </form>
 <br><br>
 
-<table border="0">
+<table border="0.5">
     <tr><th>ID</th><th>SSN</th><th>Last Name</th><th>First Name</th><th>User name</th><th>Action</th></tr>
 
     <% 
