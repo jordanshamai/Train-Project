@@ -27,6 +27,22 @@
     cursor: pointer;
 }
 </style>
+<script>
+    function submitFormByLineChange() {
+    	document.getElementById('formAction').value = 'lineChange';
+        document.getElementById('searchForm').submit();
+    }
+    
+    function submitFormByDirectionChange() {
+        document.getElementById('formAction').value = 'directionChange';
+        document.getElementById('searchForm').submit();
+    }
+    
+    function submitFormBySearchButton() {
+        document.getElementById('formAction').value = 'search';
+        document.getElementById('searchForm').submit();
+    }
+</script>
 </head>
 <body>
 <div class="header">
@@ -43,7 +59,8 @@
 </div>
 
 <h2>Search for Train Schedules</h2>
-<form method="post" action="SearchServlet">
+<form method="post" id="searchForm" name="searchForm" action="SearchServlet">
+	<input type="hidden" id="formAction" name="formAction" value="">
     <label for="travelDate">Travel Date:</label>
     <%
         String travelDateParam = request.getParameter("travelDate");
@@ -63,41 +80,79 @@
     <br><br>
     <label for="departureAfterTime">Departure After Time:</label>
     <input type="time" id="departureAfterTime" name="departureAfterTime" value="<%= request.getParameter("departureAfterTime") != null ? request.getParameter("departureAfterTime") : "" %>" required><br><br>
-    <label for="originStation">Origin Station:</label>
-    <select id="originStation" name="originStation" required>
-        <option value="">Select Origin Station</option>
+    <label for="line">Line:</label>
+    <select id="line" name="line" required onChange="submitFormByLineChange()">
+        <option value="">Select a Line</option>
         <% 
-            List<Map<String, Object>> stations = (List<Map<String, Object>>) request.getAttribute("stations");
-            String selectedOriginStation = request.getParameter("originStation");
-            if (stations != null) {
-                for (Map<String, Object> station : stations) { 
-                    String stationId = station.get("StationId").toString();
-                    String stationName = station.get("StationName").toString();
-                    boolean isSelected = stationId.equals(selectedOriginStation);
+            List<Map<String, Object>> lines = (List<Map<String, Object>>) request.getAttribute("lines");
+            String selectedLineId = (String) request.getAttribute("selectedLineId");
+            if (lines != null) {
+                for (Map<String, Object> line : lines) { 
+                    String lineId = line.get("LineId").toString();
+                    String lineName = line.get("LineName").toString();
+                    boolean isSelected = lineId.equals(selectedLineId);
         %>
-                    <option value="<%= stationId %>" <%= isSelected ? "selected" : "" %>><%= stationName %></option>
+                    <option value="<%= lineId %>" <%= isSelected ? "selected" : "" %>><%= lineName %></option>
         <%      }
             }
         %>
     </select><br><br>
-    <label for="destinationStation">Destination Station:</label>
-    <select id="destinationStation" name="destinationStation" required>
-        <option value="">Select Destination Station</option>
+    <% if (selectedLineId != null && !selectedLineId.isEmpty()) { %>
+	    <label for="direction">Direction:</label>
+	    <select id="direction" name="direction" required onChange="submitFormByDirectionChange()">
+        <option value="">Select a Direction</option>
         <% 
-            String selectedDestinationStation = request.getParameter("destinationStation");
-            if (stations != null) {
-                for (Map<String, Object> station : stations) { 
-                    String stationId = station.get("StationId").toString();
-                    String stationName = station.get("StationName").toString();
-                    boolean isSelected = stationId.equals(selectedDestinationStation);
+            List<Map<String, Object>> directions = (List<Map<String, Object>>) request.getAttribute("directions");
+            String selectedDirectionId = (String) request.getAttribute("selectedDirectionId");
+            if (directions != null) {
+                for (Map<String, Object> direction : directions) { 
+                    String directionId = direction.get("DirectionId").toString();
+                    String directionName = direction.get("DirectionName").toString();
+                    boolean isSelected = directionId.equals(selectedDirectionId);
         %>
-                    <option value="<%= stationId %>" <%= isSelected ? "selected" : "" %>><%= stationName %></option>
+                    <option value="<%= directionId %>" <%= isSelected ? "selected" : "" %>><%= directionName %></option>
         <%      }
             }
         %>
-    </select><br><br>
-    <input type="submit" value="Search">
-    <button type="button" onclick="history.back()">Back</button>
+    	</select><br><br>
+	    <% if (selectedDirectionId != null && !selectedDirectionId.isEmpty()) { %>
+		    <label for="originStation">Origin Station:</label>
+		    <select id="originStation" name="originStation" required>
+		        <option value="">Select Origin Station</option>
+		        <% 
+		            List<Map<String, Object>> stations = (List<Map<String, Object>>) request.getAttribute("stations");
+		            String selectedOriginStation = request.getParameter("originStation");
+		            if (stations != null) {
+		                for (Map<String, Object> station : stations) { 
+		                    String stationId = station.get("StationId").toString();
+		                    String stationName = station.get("StationName").toString();
+		                    boolean isSelected = stationId.equals(selectedOriginStation);
+		        %>
+		                    <option value="<%= stationId %>" <%= isSelected ? "selected" : "" %>><%= stationName %></option>
+		        <%      }
+		            }
+		        %>
+		    </select><br><br>
+		    <label for="destinationStation">Destination Station:</label>
+		    <select id="destinationStation" name="destinationStation" required>
+		        <option value="">Select Destination Station</option>
+		        <% 
+		            String selectedDestinationStation = request.getParameter("destinationStation");
+		            if (stations != null) {
+		                for (Map<String, Object> station : stations) { 
+		                    String stationId = station.get("StationId").toString();
+		                    String stationName = station.get("StationName").toString();
+		                    boolean isSelected = stationId.equals(selectedDestinationStation);
+		        %>
+		                    <option value="<%= stationId %>" <%= isSelected ? "selected" : "" %>><%= stationName %></option>
+		        <%      }
+		            }
+		        %>
+		    </select><br><br>
+		    <input type="button" value="Search" onclick="submitFormBySearchButton()">
+		    <button type="button" onclick="history.back()">Back</button>
+	    <% } %>
+	<% } %>	    
 </form>
 
 <% 

@@ -21,33 +21,114 @@ public class SearchServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Fetching stations for dropdowns
     	List<Map<String,Object>> lines = fetchLines();
-        List<Map<String, Object>> stations = fetchStations();
+        //List<Map<String, Object>> stations = fetchStations();
         
         // Debug: Print the stations list to verify it is not null
-        System.out.println("Stations in doGet: " + stations);
+        //System.out.println("Stations in doGet: " + stations);
         // Setting stations attribute for the JSP
-        request.setAttribute("stations", stations);
+        request.setAttribute("lines", lines);
+        //request.setAttribute("stations", stations);
         request.getRequestDispatcher("search.jsp").forward(request, response);
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int originStationId = Integer.parseInt(request.getParameter("originStation"));
-        int destinationStationId = Integer.parseInt(request.getParameter("destinationStation"));
+    	String action = request.getParameter("formAction");
+
+        if ("search".equals(action)) {
+            handleSearchPost(request, response);
+        } else if ("lineChange".equals(action)) {
+            handleLineChangePost(request, response);
+        } else if ("directionChange".equals(action)) {
+            handleDirectionChangePost(request, response);
+        } else {
+            
+        }
+    }
+    
+    protected void handleLineChangePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	int lineId = Integer.parseInt(request.getParameter("line"));
+    	List<Map<String, Object>> directionsByLine = fetchDirections(lineId);
+    	request.setAttribute("directions", directionsByLine);
+    	    	
+    	List<Map<String,Object>> lines = fetchLines();
+    	request.setAttribute("lines", lines);
+    	request.setAttribute("selectedLineId", String.valueOf(lineId));
+    	request.getRequestDispatcher("search.jsp").forward(request, response);
+    }
+    
+    protected void handleDirectionChangePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	int lineId = Integer.parseInt(request.getParameter("line"));
+    	int directionId = Integer.parseInt(request.getParameter("direction"));
+    	    	
+    	List<Map<String, Object>> stationsbyLine = fetchStations(lineId, directionId);
+    	request.setAttribute("stations", stationsbyLine);
+    	    	
+    	List<Map<String,Object>> lines = fetchLines();
+    	request.setAttribute("lines", lines);
+    	request.setAttribute("selectedLineId", String.valueOf(lineId));
+    	
+    	List<Map<String, Object>> directionsbyLine = fetchDirections(lineId);
+    	request.setAttribute("directions", directionsbyLine);
+    	request.setAttribute("selectedDirectionId", String.valueOf(directionId));
+    	
+    	request.getRequestDispatcher("search.jsp").forward(request, response);
+    }
+    
+    
+    protected void handleSearchPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	int originStationId = 0;
+    	if (request.getParameter("originStation") != null && request.getParameter("originStation") != "") {
+    		originStationId = Integer.parseInt(request.getParameter("originStation"));
+    	}
+    	
+    	int destinationStationId = 0;
+    	if (request.getParameter("destinationStation") != null && request.getParameter("destinationStation") != "") {
+    		destinationStationId = Integer.parseInt(request.getParameter("destinationStation"));
+    	}
+    	
         String travelDate = request.getParameter("travelDate");
         String departureAfterTime = request.getParameter("departureAfterTime");
-        int lineId = 1;
-        int directionId = 1;
+        int lineId = Integer.parseInt(request.getParameter("line"));
+        int directionId = Integer.parseInt(request.getParameter("direction"));
         List<Map<String, Object>> schedules = new ArrayList<>();
         HttpSession session = request.getSession();
         int numStops = 0;
-
-        // Fetching stations for dropdowns
-        List<Map<String, Object>> stations = fetchStations();
-        // Debug: Print the stations list to verify it is not null
-        System.out.println("Stations in doPost: " + stations);
-        // Setting stations attribute for the JSP
+        
+        // Fetching data for dropdowns
+        
+        List<Map<String,Object>> lines = fetchLines();
+    	request.setAttribute("lines", lines);
+    	request.setAttribute("selectedLineId", String.valueOf(lineId));
+    	
+    	List<Map<String, Object>> directionsbyLine = fetchDirections(lineId);
+    	request.setAttribute("directions", directionsbyLine);
+    	request.setAttribute("selectedDirectionId", String.valueOf(directionId));
+        
+        List<Map<String, Object>> stations = fetchStations(lineId, directionId);
         request.setAttribute("stations", stations);
-
+        
+        if (originStationId == 0) {
+        	for (Map<String, Object> direction : directionsbyLine) {
+        		System.out.println("direction.get(\"DirectionId\").toString(): " + direction.get("DirectionId").toString());
+        		System.out.println("directionId: " + directionId);
+        		if (Integer.parseInt(String.valueOf(directionId)) == Integer.parseInt(direction.get("DirectionId").toString())) {
+        			System.out.println("Do we ever get here?");
+        			originStationId = Integer.parseInt(direction.get("LineOriginStationId").toString());
+        		}
+        	}
+        }
+        
+        if (destinationStationId == 0) {
+        	for (Map<String, Object> direction : directionsbyLine) {
+        		System.out.println("direction.get(\"DirectionId\").toString(): " + direction.get("DirectionId").toString());
+        		System.out.println("directionId: " + directionId);
+        		if (Integer.parseInt(String.valueOf(directionId)) == Integer.parseInt(direction.get("DirectionId").toString())) {
+        			System.out.println("Do we ever get here?");
+        			destinationStationId = Integer.parseInt(direction.get("LineDestinationStationId").toString());
+        		}
+        	}
+        }
+        
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cs336project", "root", "Secret Password");
@@ -82,6 +163,10 @@ public class SearchServlet extends HttpServlet {
                 
                 schedules.add(schedule);
             }
+            
+            rs1.close();
+            ps1.close();
+            conn.close();
            
         } catch (Exception e) {
             e.printStackTrace();
@@ -95,6 +180,8 @@ public class SearchServlet extends HttpServlet {
         request.setAttribute("departureAfterTime", departureAfterTime);
         request.getRequestDispatcher("search.jsp").forward(request, response);
     }
+    
+    
     private List<Map<String, Object>> fetchLines() {
         List<Map<String, Object>> lines = new ArrayList<>();
         try {
@@ -125,7 +212,7 @@ public class SearchServlet extends HttpServlet {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cs336project", "root", "Secret Password");
 
-            String query = "SELECT DirectionId, DirectionName FROM line_direction where LineId = ? order by DirectionId";
+            String query = "SELECT DirectionId, DirectionName, OriginStationId AS LineOriginStationId, DestinationStationId AS LineDestinationStationId FROM line_direction where LineId = ? order by DirectionId";
             PreparedStatement ps = conn.prepareStatement(query);
             ps.setInt(1, lineId);
             ResultSet rs = ps.executeQuery();
@@ -133,6 +220,8 @@ public class SearchServlet extends HttpServlet {
                 Map<String, Object> direction = new HashMap<>();
                 direction.put("DirectionId", rs.getInt("DirectionId"));
                 direction.put("DirectionName", rs.getString("DirectionName"));
+                direction.put("LineOriginStationId", rs.getInt("LineOriginStationId"));
+                direction.put("LineDestinationStationId", rs.getInt("LineDestinationStationId"));
                 directions.add(direction);
             }
             rs.close();
@@ -143,14 +232,16 @@ public class SearchServlet extends HttpServlet {
         }
         return directions;
     }
-    private List<Map<String, Object>> fetchStations() {
+    private List<Map<String, Object>> fetchStations(int lineId, int directionId) {
         List<Map<String, Object>> stations = new ArrayList<>();
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cs336project", "root", "Secret Password");
 
-            String query = "SELECT StationId, StationName FROM station";
+            String query = "SELECT s.StationId, s.StationName FROM station s INNER JOIN stop st ON s.StationId = st.StationId AND st.LineId = ? and st.DirectionId = ? ORDER BY st.StopOrder";
             PreparedStatement ps = conn.prepareStatement(query);
+            ps.setInt(1, lineId);
+            ps.setInt(2, directionId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Map<String, Object> station = new HashMap<>();
