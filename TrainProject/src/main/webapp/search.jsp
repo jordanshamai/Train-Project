@@ -51,6 +51,7 @@
             <img src="group17-logo.png" alt="Group 17 Transit Logo">
         </a>
     </div>
+    <button onclick="window.location.href='ForumServlet'">Have a Question?</button>
     <div class="top-right">
         <form method="post" action="logout">
             <input type="submit" value="Logout">

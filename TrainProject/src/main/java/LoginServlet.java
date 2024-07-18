@@ -45,6 +45,7 @@ public class LoginServlet extends HttpServlet {
             	HttpSession session = request.getSession();
             	
             	session.setAttribute("employeeId", employeeId);
+            	session.setAttribute("employeeType", employeeType);
                 session.setAttribute("employeeName", employeeName);             // If a match is found in the employees table, redirect to hello.jsp
                 if(employeeType.equals("Admin")) {
                 response.sendRedirect("adminDashboard.jsp");
