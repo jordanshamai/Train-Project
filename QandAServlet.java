@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +35,13 @@ public class QandAServlet extends HttpServlet {
     	 String button = request.getParameter("button");
     	 LOGGER.info("button="+button);
     	 String CustomerId = request.getParameter("CustomerId");
+    	 String EmployeeName = request.getParameter("EmployeeName");
     	 String question = request.getParameter("question");
          String password = request.getParameter("password");
          String firstname = request.getParameter("firstname");
          String lastname = request.getParameter("lastname");
          String username = request.getParameter("username");
+         
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -246,26 +249,78 @@ public class QandAServlet extends HttpServlet {
             // LOGGER.info("processing button '"+button+"'");
  
 
-        	// LOGGER.info("processing button '"+button+"'");
+        	//LOGGER.info("processing button '"+button+"'");
         	
         	//response.sendRedirect("employeepage.jsp");
         	Statement stmt = conn.createStatement();
         	String keyword = request.getParameter("search");
-        	LOGGER.info("processing keyword '"+keyword+"'");
+
+        	String qandatable = "";
+            if (button!=null && button.equals("Save")) {
+	        	String sql = "update qanda set answer=? where QID=?";
+	            ps = conn.prepareStatement(sql);
+	            ps.setString(1, request.getParameter("newAnswer"));
+	            ps.setString(2, request.getParameter("qid"));
+	            
+	
+	            // Execute the update
+	            int result = ps.executeUpdate();
+	        	if (result>0) {
+	        		qandatable+="<h2>Answer: '"+request.getParameter("newAnswer")+"' was saved </h2>";
+	        	}
+            }
+            
+        	HttpSession session = request.getSession();
+            Enumeration<String> attributeNames = session.getAttributeNames();
+            /*
+            while (attributeNames.hasMoreElements()) {
+                String attributeName = attributeNames.nextElement();
+                Object attributeValue = session.getAttribute(attributeName);
+
+                LOGGER.info("" + attributeName + ": " + attributeValue + "");
+            }
+            */
+        	
+        	EmployeeName = (String)session.getAttribute("employeeName");
+        	LOGGER.info("processing EmployeeName '"+EmployeeName+"'");
+        	String answerSelector = "answer is not NULL";
+        	if(EmployeeName!=null) {
+        		answerSelector = "";
+        	}
         	if (keyword!=null && keyword.length()!=0) {
         		keyword = " and question like '%"+keyword+"%' ";
         	} else {
         		keyword="";
         	}
-        	String sql = "SELECT question, answer FROM qanda where answer is not NULL "+keyword;
+        	String where = "";
+        	if(keyword.length()!=0 || answerSelector.length()!=0) {
+        		where="where ";
+        	}
+        	String sql = "SELECT QID, question, answer FROM qanda "+where+" "+answerSelector+" "+keyword;
         	LOGGER.info("processing sql '"+sql+"'");
             rs = stmt.executeQuery(sql);
-            String qandatable = "<table border=1><tr><th>Question</th><th>Answer</th></tr>";
+            qandatable += "<table border=1><tr><th>Question</th><th>Answer</th>";
+            if(EmployeeName!=null) {
+            	qandatable+="<th>Action</th>";
+            }
+            qandatable+="</tr>";
             while (rs.next()) {
-            	qandatable+="<tr><td>"+rs.getString("question")+"</td><td>"+rs.getString("answer")+"</td></tr>";
+            	qandatable+="<tr><td>"+rs.getString("question")+"</td>";
+            	if(EmployeeName!=null) {
+            		if(rs.getString("answer")==null) {
+            			qandatable+="<td><form method=get action=QandAServlet><input type=text name=newAnswer><input type=hidden name=qid value="+rs.getString("QID")+"></td><td><input type=submit name=button value=Save></form></td>";
+            		} else {
+            			qandatable+="<td>"+rs.getString("answer")+"</td>";
+            		}
+            	} else {
+            		qandatable+="<td>"+rs.getString("answer")+"</td>";
+            	}
+            	qandatable+="</tr>";	
+            	
             }
             qandatable+="</table>";
             
+
             
             if (button!=null && button.equals("Ask Question")) {
 
