@@ -51,9 +51,9 @@
     </div>
 </div>
     <h1>Customer Representative Dashboard</h1>
-    <a href="AdminStationServlet" class="button">Edit Train Schedules</a>
-    <a href="ForumServlet" class="button">Customer Forum</a>
-    <a href="ProduceSchedulesServlet" class="button">List Train Schedules</a>
-    <a href="ListCustomersServlet" class="button">List Customers</a>
+    <a href="AdminStationServlet" class="button">Station Management</a>
+    <a href="ForumServlet" class="button">Customer Questions</a>
+    <a href="ProduceSchedulesServlet" class="button">Train Schedules</a>
+    <a href="ListCustomersServlet" class="button">Customers</a>
 </body>
 </html>

@@ -26,10 +26,25 @@
     height: 110px;
     cursor: pointer;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
 </style>
 <script>
     function submitFormByLineChange() {
-    	document.getElementById('formAction').value = 'lineChange';
+        document.getElementById('formAction').value = 'lineChange';
         document.getElementById('searchForm').submit();
     }
     
@@ -59,9 +74,14 @@
     </div>
 </div>
 
+<% 
+	String customerName = (String) session.getAttribute("customerName");
+%>
+<h1>Welcome, <%= customerName != null ? customerName : "Guest" %>!</h1>
+
 <h2>Search for Train Schedules</h2>
 <form method="post" id="searchForm" name="searchForm" action="SearchServlet">
-	<input type="hidden" id="formAction" name="formAction" value="">
+    <input type="hidden" id="formAction" name="formAction" value="">
     <label for="travelDate">Travel Date:</label>
     <%
         String travelDateParam = request.getParameter("travelDate");
@@ -99,8 +119,8 @@
         %>
     </select><br><br>
     <% if (selectedLineId != null && !selectedLineId.isEmpty()) { %>
-	    <label for="direction">Direction:</label>
-	    <select id="direction" name="direction" required onChange="submitFormByDirectionChange()">
+        <label for="direction">Direction:</label>
+        <select id="direction" name="direction" required onChange="submitFormByDirectionChange()">
         <option value="">Select a Direction</option>
         <% 
             List<Map<String, Object>> directions = (List<Map<String, Object>>) request.getAttribute("directions");
@@ -115,45 +135,45 @@
         <%      }
             }
         %>
-    	</select><br><br>
-	    <% if (selectedDirectionId != null && !selectedDirectionId.isEmpty()) { %>
-		    <label for="originStation">Origin Station:</label>
-		    <select id="originStation" name="originStation" required>
-		        <option value="">Select Origin Station</option>
-		        <% 
-		            List<Map<String, Object>> stations = (List<Map<String, Object>>) request.getAttribute("stations");
-		            String selectedOriginStation = request.getParameter("originStation");
-		            if (stations != null) {
-		                for (Map<String, Object> station : stations) { 
-		                    String stationId = station.get("StationId").toString();
-		                    String stationName = station.get("StationName").toString();
-		                    boolean isSelected = stationId.equals(selectedOriginStation);
-		        %>
-		                    <option value="<%= stationId %>" <%= isSelected ? "selected" : "" %>><%= stationName %></option>
-		        <%      }
-		            }
-		        %>
-		    </select><br><br>
-		    <label for="destinationStation">Destination Station:</label>
-		    <select id="destinationStation" name="destinationStation" required>
-		        <option value="">Select Destination Station</option>
-		        <% 
-		            String selectedDestinationStation = request.getParameter("destinationStation");
-		            if (stations != null) {
-		                for (Map<String, Object> station : stations) { 
-		                    String stationId = station.get("StationId").toString();
-		                    String stationName = station.get("StationName").toString();
-		                    boolean isSelected = stationId.equals(selectedDestinationStation);
-		        %>
-		                    <option value="<%= stationId %>" <%= isSelected ? "selected" : "" %>><%= stationName %></option>
-		        <%      }
-		            }
-		        %>
-		    </select><br><br>
-		    <input type="button" value="Search" onclick="submitFormBySearchButton()">
-		    <button type="button" onclick="history.back()">Back</button>
-	    <% } %>
-	<% } %>	    
+        </select><br><br>
+        <% if (selectedDirectionId != null && !selectedDirectionId.isEmpty()) { %>
+            <label for="originStation">Origin Station:</label>
+            <select id="originStation" name="originStation" required>
+                <option value="">Select Origin Station</option>
+                <% 
+                    List<Map<String, Object>> stations = (List<Map<String, Object>>) request.getAttribute("stations");
+                    String selectedOriginStation = request.getParameter("originStation");
+                    if (stations != null) {
+                        for (Map<String, Object> station : stations) { 
+                            String stationId = station.get("StationId").toString();
+                            String stationName = station.get("StationName").toString();
+                            boolean isSelected = stationId.equals(selectedOriginStation);
+                %>
+                            <option value="<%= stationId %>" <%= isSelected ? "selected" : "" %>><%= stationName %></option>
+                <%      }
+                    }
+                %>
+            </select><br><br>
+            <label for="destinationStation">Destination Station:</label>
+            <select id="destinationStation" name="destinationStation" required>
+                <option value="">Select Destination Station</option>
+                <% 
+                    String selectedDestinationStation = request.getParameter("destinationStation");
+                    if (stations != null) {
+                        for (Map<String, Object> station : stations) { 
+                            String stationId = station.get("StationId").toString();
+                            String stationName = station.get("StationName").toString();
+                            boolean isSelected = stationId.equals(selectedDestinationStation);
+                %>
+                            <option value="<%= stationId %>" <%= isSelected ? "selected" : "" %>><%= stationName %></option>
+                <%      }
+                    }
+                %>
+            </select><br><br>
+            <input type="button" value="Search" onclick="submitFormBySearchButton()">
+            <button type="button" onclick="history.back()">Back</button>
+        <% } %>
+    <% } %>        
 </form>
 
 <% 
@@ -182,17 +202,18 @@
         }
     }
     if (!formattedTravelDateForDisplay.isEmpty()) { %>
-    <h2>Train Schedules for <%= formattedTravelDateForDisplay %></h2>
+    <h3>Train Schedules for <%= formattedTravelDateForDisplay %></h3>
 <% }
     if (!formattedDepartureTimeForDisplay.isEmpty()) { %>
-    <h3>Trains departing after <%= formattedDepartureTimeForDisplay %></h3>
+    <h4>Trains departing after <%= formattedDepartureTimeForDisplay %></h4>
 <% } %>
 
 <% 
     List<Map<String, Object>> schedules = (List<Map<String, Object>>) request.getAttribute("schedules");
     if (schedules != null && !schedules.isEmpty()) { %>
-    <table border="1">
+    <table>
         <tr>
+            <th>Line Name</th>
             <th>Origin Station Name</th>
             <th>Departure Time</th>
             <th>Train Number</th>
@@ -205,6 +226,7 @@
         <% 
             for (Map<String, Object> schedule : schedules) { %>
         <tr>
+            <td><%= schedule.get("LineName") %></td>
             <td><%= schedule.get("OriginStationName") %></td>
             <td><%= schedule.get("DepartureTime") %></td>
             <td><%= schedule.get("TrainNumber") %></td>
@@ -229,9 +251,8 @@
                     <input type="hidden" name="TrainId" value="<%= schedule.get("TrainId") %>">
                     <input type="hidden" name="TrainNumber" value="<%= schedule.get("TrainNumber") %>">
                     <input type="hidden" name="CustomerId" value="<%= session.getAttribute("CustomerId") %>">
-                    <input type="hidden" name="FareTypeId" value="1">
-                    <input type="hidden" name="RoundTrip" value="0">
                     <input type="hidden" name="CalculatedFare" value="<%= schedule.get("CalculatedFare") %>">
+                    <input type="hidden" name="LineName" value="<%= schedule.get("LineName") %>">
                     <input type="submit" value="Reserve">
                 </form>
             </td>

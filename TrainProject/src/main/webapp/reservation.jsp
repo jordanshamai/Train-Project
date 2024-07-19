@@ -27,6 +27,18 @@
         .content {
             padding: 20px;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -36,51 +48,59 @@
                 <img src="group17-logo.png" alt="Group 17 Transit Logo">
             </a>
         </div>
-         <button onclick="window.location.href='ForumServlet'">Have a Question?</button>
+        <button onclick="window.location.href='ForumServlet'">Have a Question?</button>
         <div class="top-right">
             <form method="post" action="LogoutServlet">
                 <input type="submit" value="Logout">
-            </form>  
+            </form>
         </div>
     </div>
 
     <div class="content">
         <h2>Your Reservation</h2>
-        
 
         <%
             List<Map<String, String>> cart = (List<Map<String, String>>) session.getAttribute("cart");
             if (cart != null && !cart.isEmpty()) {
         %>
-            <table border="1">
+            <table>
                 <tr>
                     <th>Departure Date and Time</th>
                     <th>Origin Station Name</th>
                     <th>Destination Station Name</th>
                     <th>Line Name</th>
                     <th>Train Number</th>
+                    <th>Fare Type</th>
+                    <th>Round Trip</th>
                     <th>Cost</th>
-                 
                 </tr>
-                <% for (int i = 0; i < cart.size(); i++) { 
-                    Map<String, String> reservation = cart.get(i);
+                <% 
+                    NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
+                    for (int i = 0; i < cart.size(); i++) { 
+                        Map<String, String> reservation = cart.get(i);
+                        double totalCost = Double.parseDouble(session.getAttribute("totalCost").toString());
+                        String formattedTotalCost = currencyFormatter.format(totalCost);
+                        String fareTypeName = String.valueOf(session.getAttribute("fareTypeName"));
+                        boolean isRoundTrip = Boolean.parseBoolean(session.getAttribute("isRoundTrip").toString());
                 %>
                     <tr>
                         <td><%= reservation.get("DepartureDateTime") %></td>
                         <td><%= reservation.get("OriginStationName") %></td>
                         <td><%= reservation.get("DestinationStationName") %></td>
-                        <td>Northeast Corridor</td>
+                        <td><%= reservation.get("LineName") %></td>
                         <td><%= reservation.get("TrainNumber") %></td>
-                        <td><%= session.getAttribute("totalCost") %></td>
+                        <td><%= fareTypeName %></td>
+                        <td><%= isRoundTrip ? "Round Trip" : "One Way" %></td>
+                        <td><%= formattedTotalCost %></td>
                     </tr>
                 <% } %>
-            <% } %>
-            
             </table>
-            <form method="post" action="ReservationServlet">
+        <% } %>
+		<br>
+        <form method="post" action="ReservationServlet">
             <input type="hidden" name="action" value="handleReservationListViewPost">
             <input type="submit" value="View Reservations">
         </form>
-        </div>
-    </body>
+    </div>
+</body>
 </html>

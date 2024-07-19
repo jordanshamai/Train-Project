@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page session="true" %>
 <%@ page import="java.util.List, java.util.Map" %>
+<%@ page import="java.text.NumberFormat" %>
+<%@ page import="java.util.Locale" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -67,26 +69,32 @@
                 <th>Total Fare</th>
                 <th>Actions</th>
             </tr>
-            <% for (Map<String, String> reservation : reservations) { %>
-                <tr>
-                    <td><%= reservation.get("DepartureTime") %></td>
-                    <td><%= reservation.get("Origin") %></td>
-                    <td><%= reservation.get("Destination") %></td>
-                    <td><%= reservation.get("LineName") %></td>
-                    <td><%= reservation.get("TrainNumber") %></td>
-                    <td><%= reservation.get("FareType") %></td>
-                    <td><%= reservation.get("RoundTrip") %></td>
-                    <td><%= reservation.get("TotalFare") %></td>
-                    <td>
-                        <form method="post" action="ReservationServlet">
-                            <input type="hidden" name="action" value="handleDeleteReservation">
-                            <input type="hidden" name="reservationId" value="<%= reservation.get("ReservationId") %>">
-                            <input type="submit" value="Delete">
-                        </form>
-                    </td>
-                </tr>
-            <% } %>
-        </table>
+            <% 
+                    NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
+                    for (Map<String, String> reservation : reservations) {
+                        double totalFare = Double.parseDouble(reservation.get("TotalFare"));
+                        String formattedTotalFare = currencyFormatter.format(totalFare);
+                        boolean isRoundTrip = Boolean.parseBoolean(reservation.get("IsRoundTrip"));
+                %>
+                    <tr>
+                        <td><%= reservation.get("DepartureTime") %></td>
+                        <td><%= reservation.get("Origin") %></td>
+                        <td><%= reservation.get("Destination") %></td>
+                        <td><%= reservation.get("LineName") %></td>
+                        <td><%= reservation.get("TrainNumber") %></td>
+                        <td><%= reservation.get("FareType") %></td>
+                        <td><%= isRoundTrip ? "Round Trip" : "One Way" %></td>
+                        <td><%= formattedTotalFare %></td>
+                        <td>
+                            <form method="post" action="ReservationServlet">
+                                <input type="hidden" name="action" value="handleDeleteReservation">
+                                <input type="hidden" name="reservationId" value="<%= reservation.get("ReservationId") %>">
+                                <input type="submit" value="Delete">
+                            </form>
+                        </td>
+                    </tr>
+                <% } %>
+            </table>
     <% } else { %>
         <p>No reservations found.</p>
     <% } %>

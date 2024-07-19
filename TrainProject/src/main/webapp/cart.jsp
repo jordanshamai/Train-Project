@@ -24,6 +24,18 @@
             height: 110px;
             cursor: pointer;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
     </style>
     <script>
         function confirmReservation(totalCost) {
@@ -51,7 +63,7 @@
         List<Map<String, String>> cart = (List<Map<String, String>>) session.getAttribute("cart");
         if (cart != null && !cart.isEmpty()) {
     %>
-        <table border="1">
+        <table>
             <tr>
                 <th>Departure Date and Time</th>
                 <th>Origin Station Name</th>
@@ -64,13 +76,29 @@
             <% for (int i = 0; i < cart.size(); i++) { 
                 Map<String, String> reservation = cart.get(i);
             %>
+                <%
+                    // Import the required class
+                    NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(java.util.Locale.US);
+                %>
+                
                 <tr>
                     <td><%= reservation.get("DepartureDateTime") %></td>
                     <td><%= reservation.get("OriginStationName") %></td>
                     <td><%= reservation.get("DestinationStationName") %></td>
-                    <td>Northeast Corridor</td>
+                    <td><%= reservation.get("LineName") %></td>
                     <td><%= reservation.get("TrainNumber") %></td>
-                    <td><%= reservation.get("CalculatedFare") %></td>
+                    <td>
+                        <%
+                            String calculatedFareStr = reservation.get("CalculatedFare");
+                            if (calculatedFareStr != null) {
+                                double calculatedFare = Double.parseDouble(calculatedFareStr);
+                                String formattedFare = currencyFormatter.format(calculatedFare);
+                                out.print(formattedFare);
+                            } else {
+                                out.print("$0.00"); // or any default value
+                            }
+                        %>
+                    </td>
                     <td>
                         <form method="post" action="CartServlet">
                             <input type="hidden" name="action" value="handleDeleteReservationPost">
@@ -111,18 +139,17 @@
         </form>
 
         <%
-            
-        	String totalCostString = "";
+            String totalCostString = "";
             double totalCostValue = 0.0;
             if (request.getAttribute("totalCost") != null) {
-            	totalCostString = request.getAttribute("totalCost").toString();
-	            if (totalCostString != null && !totalCostString.isEmpty()) {
-	                try {
-	                    totalCostValue = Double.parseDouble(totalCostString);
-	                } catch (NumberFormatException e) {
-	                    totalCostValue = 0.0; // or handle the error appropriately
-	                }
-	            }
+                totalCostString = request.getAttribute("totalCost").toString();
+                if (totalCostString != null && !totalCostString.isEmpty()) {
+                    try {
+                        totalCostValue = Double.parseDouble(totalCostString);
+                    } catch (NumberFormatException e) {
+                        totalCostValue = 0.0; // or handle the error appropriately
+                    }
+                }
             }
             String formattedTotalCost = String.format(Locale.US, "$%,.2f", totalCostValue);
         %>

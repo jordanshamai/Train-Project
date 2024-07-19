@@ -19,15 +19,8 @@ public class SearchServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Fetching stations for dropdowns
-    	List<Map<String,Object>> lines = fetchLines();
-        //List<Map<String, Object>> stations = fetchStations();
-        
-        // Debug: Print the stations list to verify it is not null
-        //System.out.println("Stations in doGet: " + stations);
-        // Setting stations attribute for the JSP
+        List<Map<String,Object>> lines = fetchLines();
         request.setAttribute("lines", lines);
-        //request.setAttribute("stations", stations);
         request.getRequestDispatcher("search.jsp").forward(request, response);
     }
 
@@ -133,7 +126,7 @@ public class SearchServlet extends HttpServlet {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/cs336project", "root", "Secret Password");
             PreparedStatement ps1 = conn.prepareStatement (
-            		("WITH OnboardingStation AS (SELECT s.StationId, s.StopOrder, stn.StationName, s.LineId FROM stop s JOIN station stn ON s.StationId = stn.StationId WHERE s.StationId = ? AND s.LineId = ? AND s.DirectionId = ?), OffboardingStation AS (SELECT s.StationId, s.StopOrder, stn.StationName, s.LineId FROM stop s JOIN station stn ON s.StationId = stn.StationId WHERE s.StationId = ? AND s.LineId = ? AND s.DirectionId = ?) SELECT onboarding.StationId AS OnboardingStationId, offboarding.StationId AS OffboardingStationId, onboarding.StationName AS OnboardingStation, TIME(TIMESTAMP(DATE_ADD(t.DepartureTime, INTERVAL SUM(CASE WHEN s.StopOrder <= onboarding.StopOrder THEN s.MinutesFromLastStop ELSE 0 END) MINUTE))) AS DepartureTime, t.TrainId, t.TrainNumber, offboarding.StationName AS OffboardingStation, TIME(TIMESTAMP(DATE_ADD(DATE_ADD(t.DepartureTime, INTERVAL SUM(CASE WHEN s.StopOrder <= onboarding.StopOrder THEN s.MinutesFromLastStop ELSE 0 END) MINUTE), INTERVAL SUM(CASE WHEN s.StopOrder > onboarding.StopOrder AND s.StopOrder <= offboarding.StopOrder THEN s.MinutesFromLastStop ELSE 0 END) MINUTE))) AS ArrivalTime, SUM(CASE WHEN s.StopOrder > onboarding.StopOrder AND s.StopOrder <= offboarding.StopOrder THEN s.MinutesFromLastStop ELSE 0 END) AS TotalTravelTime, ((SELECT LineCost FROM line WHERE LineId = onboarding.LineId) / (SELECT MAX(StopOrder) FROM stop WHERE LineId = onboarding.LineId) * ABS(offboarding.StopOrder - onboarding.StopOrder)) AS CalculatedFare FROM stop s JOIN train t ON s.LineId = t.LineId AND t.DirectionId = s.DirectionId JOIN OnboardingStation onboarding ON s.LineId = onboarding.LineId JOIN OffboardingStation offboarding ON s.LineId = offboarding.LineId WHERE t.DirectionId = ? AND t.LineId = ? AND s.DirectionId = t.DirectionId GROUP BY t.TrainId, t.TrainNumber, t.DepartureTime, onboarding.StationName, offboarding.StationName, t.LineId, onboarding.StopOrder, offboarding.StopOrder HAVING DepartureTime BETWEEN ? AND '24:00:00' ORDER BY DepartureTime")); 
+            		("WITH OnboardingStation AS (SELECT s.StationId, s.StopOrder, stn.StationName, s.LineId FROM stop s JOIN station stn ON s.StationId = stn.StationId WHERE s.StationId = ? AND s.LineId = ? AND s.DirectionId = ?), OffboardingStation AS (SELECT s.StationId, s.StopOrder, stn.StationName, s.LineId FROM stop s JOIN station stn ON s.StationId = stn.StationId WHERE s.StationId = ? AND s.LineId = ? AND s.DirectionId = ?) SELECT onboarding.StationId AS OnboardingStationId, offboarding.StationId AS OffboardingStationId, onboarding.StationName AS OnboardingStation, TIME(TIMESTAMP(DATE_ADD(t.DepartureTime, INTERVAL SUM(CASE WHEN s.StopOrder <= onboarding.StopOrder THEN s.MinutesFromLastStop ELSE 0 END) MINUTE))) AS DepartureTime, t.TrainId, t.TrainNumber, offboarding.StationName AS OffboardingStation, TIME(TIMESTAMP(DATE_ADD(DATE_ADD(t.DepartureTime, INTERVAL SUM(CASE WHEN s.StopOrder <= onboarding.StopOrder THEN s.MinutesFromLastStop ELSE 0 END) MINUTE), INTERVAL SUM(CASE WHEN s.StopOrder > onboarding.StopOrder AND s.StopOrder <= offboarding.StopOrder THEN s.MinutesFromLastStop ELSE 0 END) MINUTE))) AS ArrivalTime, SUM(CASE WHEN s.StopOrder > onboarding.StopOrder AND s.StopOrder <= offboarding.StopOrder THEN s.MinutesFromLastStop ELSE 0 END) AS TotalTravelTime, ((SELECT LineCost FROM line WHERE LineId = onboarding.LineId) / (SELECT MAX(StopOrder) FROM stop WHERE LineId = onboarding.LineId) * ABS(offboarding.StopOrder - onboarding.StopOrder)) AS CalculatedFare, l.LineName FROM stop s JOIN train t ON s.LineId = t.LineId AND t.DirectionId = s.DirectionId JOIN OnboardingStation onboarding ON s.LineId = onboarding.LineId JOIN OffboardingStation offboarding ON s.LineId = offboarding.LineId JOIN line l ON t.LineId = l.LineId WHERE t.DirectionId = ? AND t.LineId = ? AND s.DirectionId = t.DirectionId GROUP BY t.TrainId, t.TrainNumber, t.DepartureTime, onboarding.StationName, offboarding.StationName, t.LineId, onboarding.StopOrder, offboarding.StopOrder, l.LineName HAVING DepartureTime BETWEEN ? AND '24:00:00' ORDER BY DepartureTime;"));
             
             ps1.setInt(1, originStationId);
             ps1.setInt(2, lineId);
@@ -160,6 +153,7 @@ public class SearchServlet extends HttpServlet {
                 schedule.put("CalculatedFare", rs1.getDouble("CalculatedFare"));
                 schedule.put("LineId", lineId);
                 schedule.put("DirectionId", directionId);
+                schedule.put("LineName", rs1.getString("LineName"));
                 
                 schedules.add(schedule);
             }
